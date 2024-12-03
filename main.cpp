@@ -12,7 +12,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-// Function to perform DFS and mark visited nodes                   
+// DFS, Mark visited Nodes                   
 void dfs(const string& node, unordered_map<string, unordered_set<string>>& adj_list, unordered_set<string>& visited) {
     stack<string> to_visit;
     to_visit.push(node);
@@ -24,7 +24,7 @@ void dfs(const string& node, unordered_map<string, unordered_set<string>>& adj_l
         if (visited.count(current) == 0) {
             visited.insert(current);
 
-            // Add all neighbors to the stack
+            // Add Neighbors to stack
             for (const auto& neighbor : adj_list[current]) {
                 if (visited.count(neighbor) == 0) {
                     to_visit.push(neighbor);
@@ -34,7 +34,7 @@ void dfs(const string& node, unordered_map<string, unordered_set<string>>& adj_l
     }
 }
 
-// Function to perform BFS and find the shortest degree of separation
+// BFS Function
 int shortest_path(const string& actor_a, const string& actor_b, unordered_map<string, unordered_set<string>>& adj_list) {
     if (adj_list.find(actor_a) == adj_list.end() || adj_list.find(actor_b) == adj_list.end()) {
         return -1; // One or both actors are not in the graph
@@ -45,7 +45,7 @@ int shortest_path(const string& actor_a, const string& actor_b, unordered_map<st
     }
 
     unordered_set<string> visited;
-    queue<pair<string, int>> to_visit; // Pair of actor and distance
+    queue<pair<string, int>> to_visit; 
     to_visit.push({actor_a, 0});
 
     while (!to_visit.empty()) {
@@ -68,7 +68,7 @@ int shortest_path(const string& actor_a, const string& actor_b, unordered_map<st
     return -1; // No path found
 }
 
-// Function to perform BFS and find the shortest path
+// BFS with path tracking
 vector<string> shortest_path_2(const string& actor_a, const string& actor_b, unordered_map<string, unordered_set<string>>& adj_list) {
     if (adj_list.find(actor_a) == adj_list.end() || adj_list.find(actor_b) == adj_list.end()) {
         return {"No path"}; // One or both actors are not in the graph
@@ -79,7 +79,7 @@ vector<string> shortest_path_2(const string& actor_a, const string& actor_b, uno
     }
 
     unordered_set<string> visited;
-    queue<pair<string, vector<string>>> to_visit; // Pair of actor and path
+    queue<pair<string, vector<string>>> to_visit; 
     to_visit.push({actor_a, {actor_a}});
 
     while (!to_visit.empty()) {
@@ -101,30 +101,29 @@ vector<string> shortest_path_2(const string& actor_a, const string& actor_b, uno
         }
     }
 
-    return {"No path"}; // No path found
+    return {"No path"}; // No path was found
 }
 
 int main() {
-    // Load JSON data from file
+    // Load JSON 
     ifstream file("tmdb_5000_credits.json");
     if (!file.is_open()) {
-        cerr << "Failed to open file. Please check the file path and name." << endl;
+        cerr << "Failed to open file." << endl;
         return 1;
     }
 
     json data;
-    file >> data;  // Parse the JSON content from the file
+    file >> data;  
     file.close();
 
-    // Adjacency list to store the actor graph
+    
     unordered_map<string, unordered_set<string>> adj_list;
 
-    // Iterate through each movie entry
+    // Iterate through each movie
     for (const auto& entry : data) {
         cout << "Processing movie: " << entry["title"] << endl;
 
         if (entry.contains("cast") && entry["cast"].is_string()) {
-            // Parse the 'cast' field as JSON
             json cast_data = json::parse(entry["cast"].get<string>());
 
             vector<string> actors;
@@ -136,7 +135,7 @@ int main() {
 
             cout << "Found " << actors.size() << " actors in movie: " << entry["title"] << endl;
 
-            // Add edges between each pair of actors
+            // Add edges 
             for (size_t i = 0; i < actors.size(); ++i) {
                 for (size_t j = i + 1; j < actors.size(); ++j) {
                     adj_list[actors[i]].insert(actors[j]);
@@ -144,7 +143,7 @@ int main() {
                 }
             }
         } else {
-            cout << "No valid cast data for movie: " << entry["title"] << endl;
+            cout << "No cast for the movie: " << entry["title"] << endl;
         }
     }
 
@@ -167,7 +166,7 @@ int main() {
 
     cout << "Adjacency list saved to adjacency_list.txt" << endl;
 
-    // Calculate degree centrality and find top 5 actors
+    // Calculate degree centrality 
     vector<pair<string, size_t>> actor_degrees;
     for (const auto& pair : adj_list) {
         actor_degrees.emplace_back(pair.first, pair.second.size());
@@ -176,16 +175,16 @@ int main() {
     // Sort actors by degree centrality in descending order
     sort(actor_degrees.begin(), actor_degrees.end(),
          [](const pair<string, size_t>& a, const pair<string, size_t>& b) {
-             return b.second < a.second; // Descending order
+             return b.second < a.second; 
          });
 
-    // Output the top 5 actors
+    // Output top 5 actors
     cout << "Top 5 actors with highest degree centrality:" << endl;
     for (size_t i = 0; i < 5 && i < actor_degrees.size(); ++i) {
         cout << actor_degrees[i].first << " - Degree: " << actor_degrees[i].second << endl;
     }
 
-    // Save the top 5 actors to a file
+    // Save the top 5 actors to file
     ofstream top_actors_file("top_5_actors.txt");
     if (!top_actors_file.is_open()) {
         cerr << "Failed to open top actors file." << endl;
@@ -198,7 +197,7 @@ int main() {
 
     top_actors_file.close();
     
-    // Determine connectivity of the graph
+    // Determine is graph is connected
     unordered_set<string> visited;
     int connected_components = 0;
 
@@ -210,7 +209,7 @@ int main() {
         }
     }
 
-    // Output results
+    // Output result
     ofstream report_file("graph_report.txt");
     if (!report_file.is_open()) {
         cerr << "Failed to open report file." << endl;
@@ -227,9 +226,9 @@ int main() {
 
     report_file.close();
     
-    // Examples of shortest degree of separation
+    // Shortest Degree of Separation
     vector<pair<string, string>> example_pairs = {
-        {"Sam Worthington", "Sean Patrick Murphy"}, // Replace with real actor names
+        {"Sam Worthington", "Sean Patrick Murphy"}, 
         {"Jennifer Connelly", "Kierstin Koppel"},
         {"Samm Levine", "Nick Frost"}
     };
@@ -253,9 +252,9 @@ int main() {
 
     report1_file.close();
     
-    // Examples of shortest paths
+    // Shortest Path with Path Tracked
     vector<pair<string, string>> example_pairs_2 = {
-        {"Sam Worthington", "Sean Patrick Murphy"}, // Replace with real actor names
+        {"Sam Worthington", "Sean Patrick Murphy"}, 
         {"Jennifer Connelly", "Kierstin Koppel"},
         {"Samm Levine", "Nick Frost"}
     };
@@ -265,7 +264,7 @@ int main() {
         cerr << "Failed to open report file." << endl;
         return 1;
     }
-
+    //Output Path
     for (const auto& pair : example_pairs_2) {
         vector<string> path = shortest_path_2(pair.first, pair.second, adj_list);
         if (path.size() == 1 && path[0] == "No path") {
